@@ -30,3 +30,6 @@ PROMPT_COMMAND=__prompt_command
 # we will edit the HISTFILE, so turn off writing.
 shopt -u histappend
 
+
+export EnhancedHistory_LOGDIR="$EnhancedHistory/log/"
+export EnhancedHistory_CACHE="$EnhancedHistory/cache"
