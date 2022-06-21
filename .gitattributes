@@ -1,0 +1,2 @@
+# shell script
+*.sh	text eol=lf linguist-language=Shell
