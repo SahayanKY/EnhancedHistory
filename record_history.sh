@@ -86,12 +86,11 @@ getLock
 	set `getLogFilePath`
 	cmdindex="$1"
 	logfile="$2"
-	dat="$cmdindex exit:$exitstatus $lastcmd"
-	if [ `echo "$dat" | wc -l` -gt 1 ]; then
-		# if lastcmd is multiple lines
-		# add cmdindex to the second and subsequent lines
-		dat=`echo "$dat" | sed -r '2,$s/^/'"$cmdindex"' /'`
-	fi
+	# set dat
+	# if lastcmd is multiple lines
+	# add cmdindex to the second and subsequent lines
+	dat=`echo "$cmdindex exit:$exitstatus $lastcmd" |
+			sed -r '2,$s/^/'"$cmdindex"' /'`
 
 	# append
 	echo "$dat" >> "$logfile"
