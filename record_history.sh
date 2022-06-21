@@ -36,8 +36,7 @@ function releaseLock(){
 
 function getLogFilePath(){
 	local cmdindex=0
-	local logfile=`cat "${EnhancedHistory_CACHE}" 2> /dev/null |
-						head -n 1` # 'head' is redundant proc.
+	local logfile=`head -n 1 "${EnhancedHistory_CACHE}" 2> /dev/null` # 'head' is redundant proc.
 	if [ ! "$logfile" ] || [ ! -f "$logfile" ]; then
 		# not found log file
 		logfile=`getNewLogFilePath`
@@ -45,8 +44,7 @@ function getLogFilePath(){
 		# log file exists
 
 		# get index of the command which will be recorded.
-		cmdindex=`cat "$logfile" |
-					tail -n 1 |
+		cmdindex=`tail -n 1 "$logfile" |
 					sed -r 's/ .+/ + 1/' |
 					xargs expr 2>/dev/null`
 		if [ ! "$?" = 0 ]; then
