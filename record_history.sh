@@ -1,24 +1,40 @@
 #!/bin/bash
 
 set -u
-trap 'trapfunc' 2 15
+trap 'trapFunc' 2 15
 
-function trapfunc(){
+function trapFunc(){
 	# don't leave a lock file even if this script suddenly exits with an error
-	[ -L "$lockfile" ] && rm -f "$lockfile" # if exists, the lock file will be deleted.
+	releaseLock
 	echo "EnhancedHistory: record_history.sh trap signal." >&2
 }
 
+function getLockFilePath(){
+	# return path to lock file
+	echo "$logdir/.lock"
+}
 
-function get_logfile(){
+function getLock(){
+	# get lock
+	local lockfile=`getLockFilePath`
 	while :
 	do
-		# get lock
+		# loop until get the lock
 		if ln -s $$ "$lockfile" 2>/dev/null; then
 			break
 		fi
 	done
+}
 
+function releaseLock(){
+	# release lock
+	local lockfile=`getLockFilePath`
+
+	# if exists, the lock file will be deleted.
+	[ -L "$lockfile" ] && rm -f "$lockfile"
+}
+
+function getLogFilePath(){
 	local cmdindex=0
 	local newlogfile=false
 	local logfile=`/usr/bin/ls -1 "$logdir"/*.log 2>/dev/null | tail -n 1`
@@ -28,7 +44,7 @@ function get_logfile(){
 	else
 		# log file exists
 
-		# get index of the command which will be recorded. 
+		# get index of the command which will be recorded.
 		cmdindex=`cat "$logfile" | tail -n 1 | sed -r 's/ .+/ + 1/' | xargs expr 2>/dev/null`
 		if [ ! "$?" = 0 ]; then
 			cmdindex=0
@@ -51,13 +67,9 @@ function get_logfile(){
 	fi
 	echo "$cmdindex" "$logfile"
 
-	# release lock
-	rm -f "$lockfile"
-
 }
 
 logdir="$EnhancedHistory/log/"
-lockfile="$logdir/.lock"
 # check the export destination directory
 if [ ! -d "$logdir" ]; then
 	# not found directory
@@ -68,19 +80,23 @@ fi
 # data processing
 exitstatus=`printf "%3d" "$1"`
 lastcmd=`echo "$2" | sed -r 's/^ *[0-9]+ *//'`
-set `get_logfile`
-cmdindex="$1"
-logfile="$2"
-dat="$cmdindex exit:$exitstatus $lastcmd"
-if [ `echo "$dat" | wc -l` -gt 1 ]; then
-	# if lastcmd is multiple lines
-	# add cmdindex to the second and subsequent lines
-	dat=`echo "$dat" | sed -r '2,$s/^/'"$cmdindex"' /'`
-fi
 
-# append
-echo "$dat" >> "$logfile"
+# get lock
+getLock
+	set `getLogFilePath`
+	cmdindex="$1"
+	logfile="$2"
+	dat="$cmdindex exit:$exitstatus $lastcmd"
+	if [ `echo "$dat" | wc -l` -gt 1 ]; then
+		# if lastcmd is multiple lines
+		# add cmdindex to the second and subsequent lines
+		dat=`echo "$dat" | sed -r '2,$s/^/'"$cmdindex"' /'`
+	fi
 
+	# append
+	echo "$dat" >> "$logfile"
 
+# release lock
+releaseLock
 
 
