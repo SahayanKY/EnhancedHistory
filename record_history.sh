@@ -6,7 +6,7 @@ trap 'trapfunc' 2 15
 function trapfunc(){
 	# don't leave a lock file even if this script suddenly exits with an error
 	[ -L "$lockfile" ] && rm -f "$lockfile" # if exists, the lock file will be deleted.
-	echo "hist2: record_history.sh trap signal." >&2
+	echo "EnhancedHistory: record_history.sh trap signal." >&2
 }
 
 
@@ -33,9 +33,9 @@ function get_logfile(){
 		if [ ! "$?" = 0 ]; then
 			cmdindex=0
 		fi
-		if [ "`cat "$logfile" | wc -l`" -ge "$hist2_linenum" ]; then
-			# the log file contains "hist2_linenum" lines already
-			# "hist2_linenum" is defined at setup.sh
+		if [ "`cat "$logfile" | wc -l`" -ge "$EnhancedHistory_LOGLINENUM" ]; then
+			# the log file contains "EnhancedHistory_LOGLINENUM" lines already
+			# "EnhancedHistory_LOGLINENUM" is defined at setup.sh
 			(
 				cd "$logdir"
 				logfile=`basename "$logfile"`
@@ -56,7 +56,7 @@ function get_logfile(){
 
 }
 
-logdir="$hist2_dir/log/"
+logdir="$EnhancedHistory/log/"
 lockfile="$logdir/.lock"
 # check the export destination directory
 if [ ! -d "$logdir" ]; then
@@ -66,12 +66,12 @@ fi
 
 # record history in an external file
 # data processing
-exitStatus=`printf "%3d" "$1"`
+exitstatus=`printf "%3d" "$1"`
 lastcmd=`echo "$2" | sed -r 's/^ *[0-9]+ *//'`
 set `get_logfile`
 cmdindex="$1"
 logfile="$2"
-dat="$cmdindex exit:$exitStatus $lastcmd"
+dat="$cmdindex exit:$exitstatus $lastcmd"
 if [ `echo "$dat" | wc -l` -gt 1 ]; then
 	# if lastcmd is multiple lines
 	# add cmdindex to the second and subsequent lines
