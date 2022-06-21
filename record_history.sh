@@ -11,7 +11,7 @@ function trapFunc(){
 
 function getLockFilePath(){
 	# return path to lock file
-	echo "$logdir/.lock"
+	echo "${EnhancedHistory_LOGDIR}/.lock"
 }
 
 function getLock(){
@@ -36,13 +36,11 @@ function releaseLock(){
 
 function getLogFilePath(){
 	local cmdindex=0
-	local newlogfile=false
-	local logfile=`find "$logdir"/*.log -writable 2>/dev/null |
-					sort |
-					tail -n 1`
-	if [ ! "$logfile" ]; then
+	local logfile=`cat "${EnhancedHistory_CACHE}" 2> /dev/null |
+						head -n 1` # 'head' is redundant proc.
+	if [ ! "$logfile" ] || [ ! -f "$logfile" ]; then
 		# not found log file
-		newlogfile=true
+		logfile=`getNewLogFilePath`
 	else
 		# log file exists
 
@@ -58,29 +56,31 @@ function getLogFilePath(){
 			# the log file contains "EnhancedHistory_LOGLINENUM" lines already
 			# "EnhancedHistory_LOGLINENUM" is defined at setup.sh
 			(
-				cd "$logdir"
+				cd "${EnhancedHistory_LOGDIR}"
 				logfile=`basename "$logfile"`
 				# change to readonly because don't need to write anymore
 				chmod a-w "$logfile"
 				tar -zcvf "${logfile}.tar.gz" "$logfile" >/dev/null 2>&1
 				rm -f "$logfile"
 			)
-			newlogfile=true
+			# get new log file path
+			logfile=`getNewLogFilePath`
 		fi
 	fi
-	if "$newlogfile"; then
-		# create new log file
-		logfile="$logdir/`date +%Y%m%d%H%M%S`.log"
-	fi
-	echo "$cmdindex" "$logfile"
 
+	echo "$cmdindex" "$logfile"
 }
 
-logdir="$EnhancedHistory/log/"
+function getNewLogFilePath(){
+	local newlogfile="${EnhancedHistory_LOGDIR}/`date +%Y%m%d%H%M%S`.log"
+	echo "$newlogfile" > "${EnhancedHistory_CACHE}"
+	echo "$newlogfile"
+}
+
 # check the export destination directory
-if [ ! -d "$logdir" ]; then
+if [ ! -d "${EnhancedHistory_LOGDIR}" ]; then
 	# not found directory
-	mkdir -p "$logdir"
+	mkdir -p "${EnhancedHistory_LOGDIR}"
 fi
 
 # record history in an external file
