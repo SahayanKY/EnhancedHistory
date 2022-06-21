@@ -37,7 +37,9 @@ function releaseLock(){
 function getLogFilePath(){
 	local cmdindex=0
 	local newlogfile=false
-	local logfile=`/usr/bin/ls -1 "$logdir"/*.log 2>/dev/null | tail -n 1`
+	local logfile=`find "$logdir"/*.log -writable 2>/dev/null |
+					sort |
+					tail -n 1`
 	if [ ! "$logfile" ]; then
 		# not found log file
 		newlogfile=true
@@ -45,7 +47,10 @@ function getLogFilePath(){
 		# log file exists
 
 		# get index of the command which will be recorded.
-		cmdindex=`cat "$logfile" | tail -n 1 | sed -r 's/ .+/ + 1/' | xargs expr 2>/dev/null`
+		cmdindex=`cat "$logfile" |
+					tail -n 1 |
+					sed -r 's/ .+/ + 1/' |
+					xargs expr 2>/dev/null`
 		if [ ! "$?" = 0 ]; then
 			cmdindex=0
 		fi
@@ -55,6 +60,8 @@ function getLogFilePath(){
 			(
 				cd "$logdir"
 				logfile=`basename "$logfile"`
+				# change to readonly because don't need to write anymore
+				chmod a-w "$logfile"
 				tar -zcvf "${logfile}.tar.gz" "$logfile" >/dev/null 2>&1
 				rm -f "$logfile"
 			)
