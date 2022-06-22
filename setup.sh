@@ -8,15 +8,22 @@ export EnhancedHistory_LOGLINENUM=5000
 function __prompt_command(){
 	# get the exit code of the last executed command
 	local status="$?"
-
+	local datetime=""
 	local lastcmd=`history 1`
+	if [ ! "$HISTTIMEFORMAT" ]; then
+		# if the time is not output.
+		# strictly behave differently.
+		# the time of 'HISTTIMEFORMAT' is the start time of the command,
+		# while the time obtained by the 'date' command is the end time of the command.
+		datetime=`date '+%Y-%m-%d %H:%M:%S'`
+	fi
 
 	# share the history with other terminals (history -a ; history -c ; history -r)
 	history -a # update .bash_history
 	NEW_HISTFILE_LINENUM=`cat "$HISTFILE" | wc -l`
 	if [ ! "$NEW_HISTFILE_LINENUM" = "$HISTFILE_LINENUM" ]; then
 		# if changed, record the history in an external file
-		"${EnhancedHistory}"/record_history.sh "$status" "$lastcmd"
+		"${EnhancedHistory}"/record_history.sh "$status" "$datetime" "$lastcmd"
 	fi
 	history -c # clear history of this terminal
 	history -r # update this history
