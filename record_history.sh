@@ -89,13 +89,18 @@ if [ ! -d "${EnhancedHistory_LOGDIR}" ]; then
 	mkdir -p "${EnhancedHistory_LOGDIR}"
 fi
 
-# record history in an external file
-# data processing
+# get data from arguments
 exitstatus=`printf "%3d" "$1"`
-currentdir="$2"
-datetime="$3"
-lastcmd="$4"
+datetime="$2"
+lastcmd="$3"
+
+# get additional data
+# hostname
 host=`hostname`
+# current directory name
+currentdir=`basename "\`pwd\`"`
+# virtual terminal number
+term=`basename "\`tty\`"`
 
 # get lock
 getLock
@@ -105,7 +110,7 @@ getLock
 	# set dat
 	# if lastcmd is multiple lines
 	# add cmdindex to the second and subsequent lines
-	dat=`echo "$cmdindex $exitstatus $host $datetime ${currentdir%/}\$ $lastcmd" |
+	dat=`echo "$cmdindex $exitstatus $host $term $datetime ${currentdir%/}\$ $lastcmd" |
 			sed -r '2,$s/^/'"$cmdindex"' /'`
 
 	# append
