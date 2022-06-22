@@ -3,9 +3,9 @@
 HISTFILE_LINENUM=`cat "$HISTFILE" | wc -l`
 
 # maximum number of lines in the external log file
-export EnhancedHistory_LOGLINENUM=100
+export EnhancedHistory_LOGLINENUM=5000
 
-function __prompt_command(){
+function __enhancedhistory_prompt_command(){
 	# get the exit code of the last executed command
 	local status="$?"
 
@@ -38,8 +38,38 @@ function __prompt_command(){
 	HISTTIMEFORMAT="$_HISTTIMEFORMAT"
 }
 
+function __enhancedhistory_add_prompt_command(){
+	local alreadySet=`echo "$PROMPT_COMMAND" | grep __enhancedhistory_prompt_command`
+	if [ ! "$alreadySet" ]; then
+		# if not added yet
+		PROMPT_COMMAND="__enhancedhistory_prompt_command ; $PROMPT_COMMAND"
+	fi
+}
+
+function __enhancedhistory_add_trap(){
+	# $ trap "echo 'trap detect exit'" 0
+	# $ trap -p 0
+	#trap -- 'echo '\''trap detect exit'\''' EXIT
+	#
+	# so get the value already set and replace '\'' with '.
+	local oldtrapcommand=`trap -p 0 |
+							sed -r '1s/^([^ ]+ +){2}//' | # remove leading string ("trap -- ")
+							sed -r "1s/^'//" |			# remove leading quotation
+							sed -r '$s/ +[^ ]+$//' |	# remove trailing string (" EXIT")
+							sed -r '$s/'\''$//'`		# remove trailing quotation
+	oldtrapcommand="${oldtrapcommand//\''\'\'/}"		# replace '\'' with '
+	local alreadySet=`echo "$oldtrapcommand" | grep __enhancedhistory_prompt_command`
+	if [ ! "$alreadySet" ]; then
+		# if not added yet
+		# add prompt_command to 0 (EXIT)
+		trap "__enhancedhistory_prompt_command; ${oldtrapcommand}" 0
+	fi
+}
+
 # change the command to be executed every time you execute some command
-PROMPT_COMMAND=__prompt_command
+__enhancedhistory_add_prompt_command
+# add trap to detect 'exit'
+__enhancedhistory_add_trap
 
 # we will edit the HISTFILE, so turn off writing.
 shopt -u histappend
