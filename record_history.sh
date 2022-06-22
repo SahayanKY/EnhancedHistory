@@ -92,8 +92,9 @@ fi
 # record history in an external file
 # data processing
 exitstatus=`printf "%3d" "$1"`
-datetime="$2"
-lastcmd="$3"
+currentdir="$2"
+datetime="$3"
+lastcmd="$4"
 host=`hostname`
 
 # get lock
@@ -104,7 +105,7 @@ getLock
 	# set dat
 	# if lastcmd is multiple lines
 	# add cmdindex to the second and subsequent lines
-	dat=`echo "$cmdindex $exitstatus $host $datetime $lastcmd" |
+	dat=`echo "$cmdindex $exitstatus $host $datetime ${currentdir%/}\$ $lastcmd" |
 			sed -r '2,$s/^/'"$cmdindex"' /'`
 
 	# append

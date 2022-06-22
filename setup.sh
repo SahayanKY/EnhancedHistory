@@ -8,6 +8,8 @@ export EnhancedHistory_LOGLINENUM=5000
 function __prompt_command(){
 	# get the exit code of the last executed command
 	local status="$?"
+	# get current directory name
+	local currentdir=`basename "\`pwd\`"`
 
 	# retreat the setting before 'history'
 	local _HISTTIMEFORMAT="$HISTTIMEFORMAT"
@@ -22,10 +24,11 @@ function __prompt_command(){
 
 	# share the history with other terminals (history -a ; history -c ; history -r)
 	history -a # update .bash_history
+	# record
 	NEW_HISTFILE_LINENUM=`cat "$HISTFILE" | wc -l`
 	if [ ! "$NEW_HISTFILE_LINENUM" = "$HISTFILE_LINENUM" ]; then
 		# if changed, record the history in an external file
-		"${EnhancedHistory}"/record_history.sh "$status" "$datetime" "$lastcmd"
+		"${EnhancedHistory}"/record_history.sh "$status" "$currentdir" "$datetime" "$lastcmd"
 	fi
 	history -c # clear history of this terminal
 	history -r # update this history
@@ -43,5 +46,8 @@ PROMPT_COMMAND=__prompt_command
 shopt -u histappend
 
 # readonly and export
-declare -r EnhancedHistory_LOGDIR="$EnhancedHistory/log/"
+if [ ! -v EnhancedHistory_LOGDIR ]; then
+	# if undefined
+	declare -r EnhancedHistory_LOGDIR="$EnhancedHistory/log/"
+fi
 export EnhancedHistory_LOGDIR
