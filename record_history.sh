@@ -9,6 +9,11 @@ function trapFunc(){
 	echo "EnhancedHistory: record_history.sh trap signal." >&2
 }
 
+function getCacheFilePath(){
+	# return path to cache
+	echo "${EnhancedHistory_LOGDIR}/.cache"
+}
+
 function getLockFilePath(){
 	# return path to lock file
 	echo "${EnhancedHistory_LOGDIR}/.lock"
@@ -36,7 +41,8 @@ function releaseLock(){
 
 function getLogFilePath(){
 	local cmdindex=0
-	local logfile=`head -n 1 "${EnhancedHistory_CACHE}" 2> /dev/null` # 'head' is redundant proc.
+	local cachefile=`getCacheFilePath`
+	local logfile=`head -n 1 "$cachefile" 2> /dev/null` # 'head' is redundant proc.
 	if [ ! "$logfile" ] || [ ! -f "$logfile" ]; then
 		# not found log file
 		logfile=`getNewLogFilePath`
@@ -71,7 +77,7 @@ function getLogFilePath(){
 
 function getNewLogFilePath(){
 	local newlogfile="${EnhancedHistory_LOGDIR}/`date +%Y%m%d%H%M%S`.log"
-	echo "$newlogfile" > "${EnhancedHistory_CACHE}"
+	echo "$newlogfile" > "`getCacheFilePath`"
 	echo "$newlogfile"
 }
 
