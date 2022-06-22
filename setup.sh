@@ -8,15 +8,17 @@ export EnhancedHistory_LOGLINENUM=5000
 function __prompt_command(){
 	# get the exit code of the last executed command
 	local status="$?"
-	local datetime=""
-	local lastcmd=`history 1`
-	if [ ! "$HISTTIMEFORMAT" ]; then
-		# if the time is not output.
-		# strictly behave differently.
-		# the time of 'HISTTIMEFORMAT' is the start time of the command,
-		# while the time obtained by the 'date' command is the end time of the command.
-		datetime=`date '+%Y-%m-%d %H:%M:%S'`
-	fi
+
+	# retreat the setting before 'history'
+	local _HISTTIMEFORMAT="$HISTTIMEFORMAT"
+	# newline immediately after a timestamp
+	HISTTIMEFORMAT='%F %T
+'   # <= don't remove
+
+	local historyresult=`history 1 |
+							sed -r '1s/^ *[0-9]+ *//'` # remove the serial number part of the history
+	local datetime=`echo "$historyresult" | head -n 1`
+	local lastcmd=`echo "$historyresult" | sed -e 1d`
 
 	# share the history with other terminals (history -a ; history -c ; history -r)
 	history -a # update .bash_history
@@ -29,6 +31,9 @@ function __prompt_command(){
 	history -r # update this history
 
 	HISTFILE_LINENUM="$NEW_HISTFILE_LINENUM"
+
+	# restore the setting
+	HISTTIMEFORMAT="$_HISTTIMEFORMAT"
 }
 
 # change the command to be executed every time you execute some command

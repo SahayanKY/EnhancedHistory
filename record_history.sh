@@ -85,7 +85,7 @@ fi
 # data processing
 exitstatus=`printf "%3d" "$1"`
 datetime="$2"
-lastcmd=`echo "$3" | sed -r 's/^ *[0-9]+ *//'` # remove the serial number part of the history
+lastcmd="$3"
 host=`hostname`
 
 # get lock
@@ -96,7 +96,7 @@ getLock
 	# set dat
 	# if lastcmd is multiple lines
 	# add cmdindex to the second and subsequent lines
-	dat=`echo "$cmdindex exit:$exitstatus $host ${datetime}${datetime:+ }$lastcmd" |
+	dat=`echo "$cmdindex exit:$exitstatus $host $datetime $lastcmd" |
 			sed -r '2,$s/^/'"$cmdindex"' /'`
 
 	# append
