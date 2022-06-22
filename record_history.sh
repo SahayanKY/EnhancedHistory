@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -u
-trap 'trapFunc' 2 15
+trap 'trapFunc' 2 3 9 15
 
 function trapFunc(){
 	# don't leave a lock file even if this script suddenly exits with an error
