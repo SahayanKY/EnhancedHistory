@@ -76,6 +76,8 @@ function getLogFilePath(){
 }
 
 function getNewLogFilePath(){
+	# generate absolute path to new log file.
+	# save the result in cache and return.
 	local newlogfile="${EnhancedHistory_LOGDIR}/`date +%Y%m%d%H%M%S`.log"
 	echo "$newlogfile" > "`getCacheFilePath`"
 	echo "$newlogfile"
