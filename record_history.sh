@@ -1,27 +1,13 @@
 #!/bin/bash
 
-set -u
-trap 'trapFunc' 2 3 9 15
-
 function trapFunc(){
 	# don't leave a lock file even if this script suddenly exits with an error
 	releaseLock
 	echo "EnhancedHistory: record_history.sh trap signal." >&2
 }
 
-function getCacheFilePath(){
-	# return path to cache
-	echo "${EnhancedHistory_LOGDIR}/.cache"
-}
-
-function getLockFilePath(){
-	# return path to lock file
-	echo "${EnhancedHistory_LOGDIR}/.lock"
-}
-
 function getLock(){
 	# get lock
-	local lockfile=`getLockFilePath`
 	while :
 	do
 		# loop until get the lock
@@ -33,7 +19,6 @@ function getLock(){
 
 function releaseLock(){
 	# release lock
-	local lockfile=`getLockFilePath`
 
 	# if exists, the lock file will be deleted.
 	[ -L "$lockfile" ] && rm -f "$lockfile"
@@ -41,7 +26,6 @@ function releaseLock(){
 
 function getLogFilePath(){
 	local cmdindex=0
-	local cachefile=`getCacheFilePath`
 	local logfile=`head -n 1 "$cachefile" 2> /dev/null` # 'head' is redundant proc.
 	if [ ! "$logfile" ] || [ ! -f "$logfile" ]; then
 		# not found log file
@@ -59,14 +43,12 @@ function getLogFilePath(){
 		if [ "`cat "$logfile" | wc -l`" -ge "$EnhancedHistory_LOGLINENUM" ]; then
 			# the log file contains "EnhancedHistory_LOGLINENUM" lines already
 			# "EnhancedHistory_LOGLINENUM" is defined at setup.sh
-			(
-				cd "${EnhancedHistory_LOGDIR}"
-				logfile=`basename "$logfile"`
-				# change to readonly because don't need to write anymore
-				chmod a-w "$logfile"
-				tar -zcvf "${logfile}.tar.gz" "$logfile" >/dev/null 2>&1
-				rm -f "$logfile"
-			)
+
+			# change to readonly because don't need to write anymore
+			chmod a-w "$logfile"
+			# compress
+			tar -zcvf "${logfile}.tar.gz" "$logfile" >/dev/null 2>&1
+			rm -f "$logfile"
 			# get new log file path
 			logfile=`getNewLogFilePath`
 		fi
@@ -76,12 +58,17 @@ function getLogFilePath(){
 }
 
 function getNewLogFilePath(){
-	# generate absolute path to new log file.
+	# generate path to new log file.
 	# save the result in cache and return.
-	local newlogfile="${EnhancedHistory_LOGDIR}/`date +%Y%m%d%H%M%S`.log"
+	local newlogfile="`date +%Y%m%d%H%M%S`.log"
 	echo "$newlogfile" > "`getCacheFilePath`"
 	echo "$newlogfile"
 }
+
+############################### basic settings #######################################
+
+set -u
+trap 'trapFunc' 2 3 9 15
 
 # check the export destination directory
 if [ ! -d "${EnhancedHistory_LOGDIR}" ]; then
@@ -89,6 +76,7 @@ if [ ! -d "${EnhancedHistory_LOGDIR}" ]; then
 	mkdir -p "${EnhancedHistory_LOGDIR}"
 fi
 
+############################### data settings ########################################
 # get data from arguments
 exitstatus=`printf "%3d" "$1"`
 datetime="$2"
@@ -97,11 +85,21 @@ lastcmd="$3"
 # get additional data
 # hostname
 host=`hostname`
-# current directory name
-currentdir=`basename "\`pwd\`"`
+# the directory where the command was executed
+executeddir=`basename "\`pwd\`"`
 # virtual terminal number
 term=`basename "\`tty\`"`
 
+######################## directory & file path settings ##############################
+# change directory
+# all subsequent processing is completed in this directory.
+cd "${EnhancedHistory_LOGDIR}"
+
+# setting the file path required for processing
+declare -r lockfile=".lock"
+declare -r cachefile=".cache"
+
+################################# write data #########################################
 # get lock
 getLock
 	set `getLogFilePath`
@@ -110,7 +108,7 @@ getLock
 	# set dat
 	# if lastcmd is multiple lines
 	# add cmdindex to the second and subsequent lines
-	dat=`echo "$cmdindex $exitstatus $host $term $datetime ${currentdir%/}\$ $lastcmd" |
+	dat=`echo "$cmdindex $exitstatus $host $term $datetime ${executeddir%/}\$ $lastcmd" |
 			sed -r '2,$s/^/'"$cmdindex"' /'`
 
 	# append
