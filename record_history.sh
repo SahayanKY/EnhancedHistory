@@ -110,13 +110,15 @@ getLock
 	set `getLogFilePath`
 	cmdindex="$1"
 	logfile="$2"
+
 	# set dat
 	# if lastcmd is multiple lines
 	# add cmdindex to the second and subsequent lines
 	dat="$cmdindex $exitstatus $HOSTNAME $term $datetime ${executeddir%/}\$ $lastcmd"
-	if [ `echo "$dat" | wc -l` -gt 1 ] ; then
-		dat=`echo "$dat" | sed -r '2,$s/^/'"$cmdindex"' /'`
-	fi
+	# since sed is slow, we will deal with it by expanding variables.
+	dat="${dat//
+/
+$cmdindex }"
 
 	# append
 	echo "$dat" >> "$logfile"
