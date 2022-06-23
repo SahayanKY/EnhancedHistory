@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# maximum number of lines in the external log file
-export EnhancedHistory_LOGLINENUM=5000
-
 function __enhancedhistory_prompt_command(){
 	# get the exit code of the last executed command
 	local status="$?"
@@ -68,6 +65,15 @@ function __enhancedhistory_add_trap(){
 		trap "__enhancedhistory_prompt_command; ${oldtrapcommand}" 0
 	fi
 }
+
+
+if ! test `printenv EnhancedHistory` ; then
+	echo "environment variable 'EnhancedHistory' is undefined."
+	return 1
+fi
+
+# maximum number of lines in the external log file
+export EnhancedHistory_LOGLINENUM=5000
 
 # change the command to be executed every time you execute some command
 __enhancedhistory_add_prompt_command
