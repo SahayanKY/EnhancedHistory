@@ -85,7 +85,7 @@ lastcmd="$4"					# the command
 
 # get additional data
 host=`hostname`					# hostname
-term=`basename "\`tty\`"`		# virtual terminal number
+term=`tty | sed -r 's@^/dev/@@'`# virtual terminal number
 
 
 ######################## directory & file path settings ##############################
