@@ -83,13 +83,6 @@ __enhancedhistory_add_trap
 # we will edit the HISTFILE, so turn off writing.
 shopt -u histappend
 
-# readonly and export
-if [ ! -v EnhancedHistory_LOGDIR ]; then
-	# if undefined
-	declare -r EnhancedHistory_LOGDIR="$EnhancedHistory/log/"
-fi
-export EnhancedHistory_LOGDIR
-
 # directory in which the command is executed
 __enhancedhistory_execDir=`basename "\`pwd\`"`
 

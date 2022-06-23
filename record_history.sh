@@ -72,16 +72,19 @@ set -u
 trap 'trapFunc' 2 3 9 15
 
 # check the export destination directory
-if [ ! -d "${EnhancedHistory_LOGDIR}" ]; then
+# readonly
+declare -r logdir="$EnhancedHistory/log/"
+if [ ! -d "$logdir" ]; then
 	# not found directory
-	mkdir -p "${EnhancedHistory_LOGDIR}"
+	mkdir -p "$logdir"
 fi
 
 # change directory
 # all subsequent processing is completed in this directory.
-cd "${EnhancedHistory_LOGDIR}"
+cd "$logdir"
 
 # setting the file path required for processing
+# readonly
 declare -r lockfile=".lock"
 declare -r cachefile=".cache"
 
