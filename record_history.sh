@@ -25,22 +25,25 @@ function releaseLock(){
 }
 
 function getLogFilePath(){
-	local cmdindex=0
+	local cmdindex=1
 	local logfile=`head -n 1 "$cachefile" 2> /dev/null` # 'head' is redundant proc.
-	if [ ! "$logfile" ] || [ ! -f "$logfile" ]; then
-		# not found log file
+	if [ ! -f "$logfile" ]; then
+		# empty, or not found log file
 		logfile=`getNewLogFilePath`
 	else
 		# log file exists
 
 		# get index of the command which will be recorded.
-		cmdindex=`tail -n 1 "$logfile" |
-					sed -r 's/ .+/ + 1/' |
-					xargs expr 2>/dev/null`
-		if [ ! "$?" = 0 ]; then
-			cmdindex=0
-		fi
-		if [ "`cat "$logfile" | wc -l`" -ge "$EnhancedHistory_LOGLINENUM" ]; then
+		# records are arranged in the log file as follows.
+		# 153   2 DESKTOP-**** tty4 2022-06-23 18:51:12 EnhancedHistory$ ls huga
+		# therefore, get the last line, extract the last index, and add 1
+        cmdindex=`tail -n 1 "$logfile"`
+        cmdindex="$((${cmdindex%% *} + 1))" # it can be calculated with 'expr', but it is slow, so this is adopted.
+        # if '+ 1' is failed, cmdindex == 1
+
+		# get the number of lines
+		local numline=`wc -l "$logfile"`
+		if [ "${numline%% *}" -ge "$EnhancedHistory_LOGLINENUM" ]; then
 			# the log file contains "EnhancedHistory_LOGLINENUM" lines already
 			# "EnhancedHistory_LOGLINENUM" is defined at setup.sh
 
@@ -97,9 +100,9 @@ datetime="$3"					 # time stamp
 lastcmd="$4"					 # the command
 
 # get additional data
-host=`hostname`					 # hostname
-term=`tty | sed -r 's@^/dev/@@'` # virtual terminal number
-
+#host="$HOSTNAME"				 # hostname (-> $HOSTNAME)
+term=`tty` 						 # virtual terminal number
+term="${term#/dev/}"			 # remove '/dev/'
 
 ################################# write data #########################################
 # get lock
@@ -110,8 +113,10 @@ getLock
 	# set dat
 	# if lastcmd is multiple lines
 	# add cmdindex to the second and subsequent lines
-	dat=`echo "$cmdindex $exitstatus $host $term $datetime ${executeddir%/}\$ $lastcmd" |
-			sed -r '2,$s/^/'"$cmdindex"' /'`
+	dat="$cmdindex $exitstatus $HOSTNAME $term $datetime ${executeddir%/}\$ $lastcmd"
+	if [ `echo "$dat" | wc -l` -gt 1 ] ; then
+			dat=`echo "$dat" | sed -r '2,$s/^/'"$cmdindex"' /'`
+	fi
 
 	# append
 	echo "$dat" >> "$logfile"
