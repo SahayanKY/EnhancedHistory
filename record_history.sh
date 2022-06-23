@@ -78,17 +78,15 @@ fi
 
 ############################### data settings ########################################
 # get data from arguments
-exitstatus=`printf "%3d" "$1"`
-datetime="$2"
-lastcmd="$3"
+exitstatus=`printf "%3d" "$1"`	# exit status
+executeddir="$2"				# the directory where the command was executed
+datetime="$3"					# time stamp
+lastcmd="$4"					# the command
 
 # get additional data
-# hostname
-host=`hostname`
-# the directory where the command was executed
-executeddir=`basename "\`pwd\`"`
-# virtual terminal number
-term=`basename "\`tty\`"`
+host=`hostname`					# hostname
+term=`basename "\`tty\`"`		# virtual terminal number
+
 
 ######################## directory & file path settings ##############################
 # change directory

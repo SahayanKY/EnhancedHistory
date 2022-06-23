@@ -28,11 +28,14 @@ function __enhancedhistory_prompt_command(){
 	if [ ! "$NEW_HISTFILE_LINENUM" = "$HISTFILE_LINENUM" ]; then
 		# if changed, new command executed.
 		# record the history in an external file
-		"${EnhancedHistory}"/record_history.sh "$status" "$datetime" "$lastcmd"
+		"${EnhancedHistory}"/record_history.sh "$status" "$__enhancedhistory_execDir" "$datetime" "$lastcmd"
 	fi
 	# load others' history
 	history -c # clear history of this terminal
 	history -r # update this history
+
+	# update current directory
+	__enhancedhistory_execDir=`basename "\`pwd\`"`
 
 	# restore the setting
 	HISTTIMEFORMAT="$_HISTTIMEFORMAT"
@@ -80,3 +83,8 @@ if [ ! -v EnhancedHistory_LOGDIR ]; then
 	declare -r EnhancedHistory_LOGDIR="$EnhancedHistory/log/"
 fi
 export EnhancedHistory_LOGDIR
+
+# directory in which the command is executed
+__enhancedhistory_execDir=`basename "\`pwd\`"`
+
+
