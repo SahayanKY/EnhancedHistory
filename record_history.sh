@@ -66,6 +66,7 @@ function getNewLogFilePath(){
 }
 
 ############################### basic settings #######################################
+######################## directory & file path settings ##############################
 
 set -u
 trap 'trapFunc' 2 3 9 15
@@ -75,6 +76,15 @@ if [ ! -d "${EnhancedHistory_LOGDIR}" ]; then
 	# not found directory
 	mkdir -p "${EnhancedHistory_LOGDIR}"
 fi
+
+# change directory
+# all subsequent processing is completed in this directory.
+cd "${EnhancedHistory_LOGDIR}"
+
+# setting the file path required for processing
+declare -r lockfile=".lock"
+declare -r cachefile=".cache"
+
 
 ############################### data settings ########################################
 # get data from arguments
@@ -87,15 +97,6 @@ lastcmd="$4"					 # the command
 host=`hostname`					 # hostname
 term=`tty | sed -r 's@^/dev/@@'` # virtual terminal number
 
-
-######################## directory & file path settings ##############################
-# change directory
-# all subsequent processing is completed in this directory.
-cd "${EnhancedHistory_LOGDIR}"
-
-# setting the file path required for processing
-declare -r lockfile=".lock"
-declare -r cachefile=".cache"
 
 ################################# write data #########################################
 # get lock
