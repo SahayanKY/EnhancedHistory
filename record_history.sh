@@ -61,7 +61,7 @@ function getNewLogFilePath(){
 	# generate path to new log file.
 	# save the result in cache and return.
 	local newlogfile="`date +%Y%m%d%H%M%S`.log"
-	echo "$newlogfile" > "`getCacheFilePath`"
+	echo "$newlogfile" > "$cachefile"
 	echo "$newlogfile"
 }
 
