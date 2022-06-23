@@ -78,14 +78,14 @@ fi
 
 ############################### data settings ########################################
 # get data from arguments
-exitstatus=`printf "%3d" "$1"`	# exit status
-executeddir="$2"				# the directory where the command was executed
-datetime="$3"					# time stamp
-lastcmd="$4"					# the command
+exitstatus=`printf "%3d" "$1"`	 # exit status
+executeddir="$2"				 # the directory where the command was executed
+datetime="$3"					 # time stamp
+lastcmd="$4"					 # the command
 
 # get additional data
-host=`hostname`					# hostname
-term=`tty | sed -r 's@^/dev/@@'`# virtual terminal number
+host=`hostname`					 # hostname
+term=`tty | sed -r 's@^/dev/@@'` # virtual terminal number
 
 
 ######################## directory & file path settings ##############################
