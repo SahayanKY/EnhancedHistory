@@ -37,9 +37,9 @@ function getLogFilePath(){
 		# records are arranged in the log file as follows.
 		# 153   2 DESKTOP-**** tty4 2022-06-23 18:51:12 EnhancedHistory$ ls huga
 		# therefore, get the last line, extract the last index, and add 1
-        cmdindex=`tail -n 1 "$logfile"`
-        cmdindex="$((${cmdindex%% *} + 1))" # it can be calculated with 'expr', but it is slow, so this is adopted.
-        # if '+ 1' is failed, cmdindex == 1
+		cmdindex=`tail -n 1 "$logfile"`
+		cmdindex="$((${cmdindex%% *} + 1))" # it can be calculated with 'expr', but it is slow, so this is adopted.
+		# if '+ 1' is failed, cmdindex == 1
 
 		# get the number of lines
 		local numline=`wc -l "$logfile"`
@@ -115,7 +115,7 @@ getLock
 	# add cmdindex to the second and subsequent lines
 	dat="$cmdindex $exitstatus $HOSTNAME $term $datetime ${executeddir%/}\$ $lastcmd"
 	if [ `echo "$dat" | wc -l` -gt 1 ] ; then
-			dat=`echo "$dat" | sed -r '2,$s/^/'"$cmdindex"' /'`
+		dat=`echo "$dat" | sed -r '2,$s/^/'"$cmdindex"' /'`
 	fi
 
 	# append
