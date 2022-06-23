@@ -1,7 +1,5 @@
 #!/bin/bash
 
-HISTFILE_LINENUM=`cat "$HISTFILE" | wc -l`
-
 # maximum number of lines in the external log file
 export EnhancedHistory_LOGLINENUM=5000
 
@@ -21,18 +19,20 @@ function __enhancedhistory_prompt_command(){
 	local lastcmd=`echo "$historyresult" | sed -e 1d`
 
 	# share the history with other terminals (history -a ; history -c ; history -r)
+	# get the number of lines in HISTFILE before and after appending
+	local HISTFILE_LINENUM=`cat "$HISTFILE" | wc -l`
 	history -a # update .bash_history
+	local NEW_HISTFILE_LINENUM=`cat "$HISTFILE" | wc -l`
+
 	# record
-	NEW_HISTFILE_LINENUM=`cat "$HISTFILE" | wc -l`
 	if [ ! "$NEW_HISTFILE_LINENUM" = "$HISTFILE_LINENUM" ]; then
-		# if changed, record the history in an external file
+		# if changed, new command executed.
+		# record the history in an external file
 		"${EnhancedHistory}"/record_history.sh "$status" "$datetime" "$lastcmd"
 	fi
 	# load others' history
 	history -c # clear history of this terminal
 	history -r # update this history
-
-	HISTFILE_LINENUM="$NEW_HISTFILE_LINENUM"
 
 	# restore the setting
 	HISTTIMEFORMAT="$_HISTTIMEFORMAT"
