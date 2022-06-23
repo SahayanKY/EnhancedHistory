@@ -94,3 +94,28 @@ export EnhancedHistory_LOGDIR
 __enhancedhistory_execDir=`basename "\`pwd\`"`
 
 
+################################### unload function ######################################
+function __enhancedhistory_unload(){
+	# to unload EnhancedHistory
+
+	# unload inner variables
+	unset "${!__enhancedhistory@}"
+
+	# unload inner functions (overwrite '{ : ;}')
+	local unloadfunctions=`declare -F |						# get function names
+							grep __enhancedhistory* |		# get related functions
+							sed -r 's/declare [^ ]+ //' |	# extract
+							sed -r 's/$/ () { : ;}/' |		# modify to eval
+							while read line ;
+							do
+								echo -n "$line ; "
+							done`
+	eval "$unloadfunctions"
+
+	echo "EnhancedHistory: unloaded"
+}
+
+
+
+
+
