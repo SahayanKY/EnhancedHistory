@@ -1,6 +1,6 @@
 # eclipse
 .project
-
+*.md.html
 
 # log directory
 log/
