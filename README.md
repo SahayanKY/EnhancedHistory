@@ -64,8 +64,7 @@ We provide the function, `__enhancedhistory_unload`, which is to disable Enhance
 ```
 *** $ __enhancedhistory_unload
 EnhancedHistory: unloaded
-*** $ cd $EnhancedHistory
-EnhancedHistory $ rm -r .
+*** $ rm -r $EnhancedHistory
 ```
 
 
