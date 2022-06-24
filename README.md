@@ -48,13 +48,13 @@ Please do `git clone` and add some codes to .bashrc
 *** $ git clone https://github.com/SahayanKY/EnhancedHistory
 *** $ vi ~/.bashrc
 export HISTFILE="${HOME}/.bash_history"			# depends on your preference
-export HISTSIZE=20000						# depends on your preference
+export HISTSIZE=20000					# depends on your preference
 export HISTFILESIZE="$HISTSIZE"				# depends on your preference
 export HISTTIMEFORMAT='%F %T '				# this value doesn't affect this script
-export HISTCONTROL=						# all command will be recorded (depends on your preference)
+export HISTCONTROL=					# all command will be recorded (depends on your preference)
 
-export EnhancedHistory="${HOME}/EnhancedHistory"		# must
-source "$EnhancedHistory/setup.sh"				# must
+export EnhancedHistory="${HOME}/EnhancedHistory"	# must
+source "$EnhancedHistory/setup.sh"			# must
 ```
 
 
