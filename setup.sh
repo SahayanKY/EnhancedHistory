@@ -1,6 +1,8 @@
 #!/bin/bash
 
 function __enhancedhistory_prompt_command(){
+	# define what to execute immediately after the user executes a command using bash's PROMPT_COMMAND
+
 	# get the exit code of the last executed command
 	local status="$?"
 
@@ -47,6 +49,8 @@ function __enhancedhistory_add_prompt_command(){
 }
 
 function __enhancedhistory_add_trap(){
+	# by setting trap, records to the log even when the shell exits
+	#
 	# $ trap "echo 'trap detect exit'" 0
 	# $ trap -p 0
 	#trap -- 'echo '\''trap detect exit'\''' EXIT

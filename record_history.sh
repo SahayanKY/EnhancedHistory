@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function trapFunc(){
-	# don't leave a lock file even if this script suddenly exits with an error
+	# delete a lock file even if this script suddenly exits with an error
 	releaseLock
 	echo "EnhancedHistory: record_history.sh trap signal." >&2
 }
